@@ -1,10 +1,9 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { toast } from "sonner";
-const USD_TO_INR = 85;
+
+
+// Always fetch fresh data on every request
+export const dynamic = "force-dynamic";
 
 type Product = {
   _id: string;
@@ -15,37 +14,33 @@ type Product = {
   productImage: string;
 };
 
-export default function InventoryPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+type InventoryData = {
+  totalProducts: number;
+  totalStock: number;
+  totalWorth: number;
+  products: Product[];
+};
 
-  useEffect(() => {
-    const fetchInventory = async () => {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/inventory`, { cache: "no-store" });
-        if (!res.ok) throw new Error("Failed to fetch inventory");
-        const data = await res.json();
-        if (!Array.isArray(data)) throw new Error("Invalid data format");
-        setProducts(data);
-      } catch (err) {
-        console.error(err);
-        toast.error("Could not load inventory");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchInventory();
-  }, []);
+export default async function InventoryPage() {
+  let data: InventoryData | null = null;
 
-  const totalProducts = products.length;
-  const totalStock = products.reduce((sum, p) => sum + (p.productQuantity || 0), 0);
-  const totalWorth =
-    products.reduce(
-      (sum, p) => sum + (p.productPrice || 0) * (p.productQuantity || 0),
-      0
-    ) * USD_TO_INR;
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/inventory`, {
+      cache: "no-store", // ensures it's fetched freshly for every request (SSR)
+    });
+    if (!res.ok) throw new Error("Failed to fetch inventory");
+    data = await res.json();
+  } catch (err) {
+    console.error(err);
+  }
 
-  if (loading) return <p className="p-8 text-center text-lg">Loading inventory...</p>;
+  if (!data) {
+    return (
+      <p className="p-8 text-center text-lg text-red-500">
+        Failed to load inventory 😢
+      </p>
+    );
+  }
 
   return (
     <div className="px-6 md:px-12 py-12 mt-6">
@@ -58,7 +53,16 @@ export default function InventoryPage() {
             <CardTitle>Total Products</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-blue-600">{totalProducts}</p>
+            <p className="text-3xl font-bold text-blue-600">{data.totalProducts}</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-yellow-50 dark:bg-yellow-900/20">
+          <CardHeader>
+            <CardTitle>Total Stock</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold text-yellow-600">{data.totalStock}</p>
           </CardContent>
         </Card>
 
@@ -68,17 +72,8 @@ export default function InventoryPage() {
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold text-green-600">
-              ₹{totalWorth.toFixed(2)}
+              ₹{(data.totalWorth * 85).toFixed(2)}
             </p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-yellow-50 dark:bg-yellow-900/20">
-          <CardHeader>
-            <CardTitle>Total Stock</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-yellow-600">{totalStock}</p>
           </CardContent>
         </Card>
       </div>
@@ -86,11 +81,11 @@ export default function InventoryPage() {
       {/* Product Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Latest Products</CardTitle>
+          <CardTitle>All Products</CardTitle>
         </CardHeader>
         <CardContent>
-          {products.length === 0 ? (
-            <p className="text-center py-6 text-gray-500">No products in inventory 🕵️‍♀️</p>
+          {data.products.length === 0 ? (
+            <p className="text-center py-6 text-gray-500">No products found 🕵️‍♀️</p>
           ) : (
             <div className="overflow-x-auto">
               <Table>
@@ -103,16 +98,14 @@ export default function InventoryPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {products.map((p) => (
+                  {data.products.map((p) => (
                     <TableRow key={p._id}>
                       <TableCell className="font-medium">{p.productName}</TableCell>
                       <TableCell>{p.productCategory}</TableCell>
                       <TableCell className="text-right">
-                        ₹{(p.productPrice * USD_TO_INR).toFixed(2)}
+                        ₹{(p.productPrice * 85).toFixed(2)}
                       </TableCell>
-                      <TableCell className="text-right">
-                        {p.productQuantity}
-                      </TableCell>
+                      <TableCell className="text-right">{p.productQuantity}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

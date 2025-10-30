@@ -33,7 +33,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // --- THIS IS THE FIX ---
     // Create a plain object for the JWT payload.
     // Do NOT pass the entire Mongoose `user` document.
     const tokenPayload = {
@@ -44,7 +43,7 @@ export async function POST(req: Request) {
 
     // Pass the new, plain object to your helper
     const token = await generateToken(tokenPayload);
-    // ------------------------
+    
 
     if (!token) {
       console.error("Token generation failed for user:", user.email);

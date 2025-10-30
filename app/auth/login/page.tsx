@@ -19,25 +19,46 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password, role }),
       });
 
+  
+
+      // 1. Check if the response is NOT OK (401, 500, etc.)
+      if (!res.ok) {
+        // Try to parse the error message, but have a fallback
+        let errorMessage = "Invalid credentials";
+        try {
+          const errorData = await res.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+          // This catches the "Unexpected end of JSON input" error
+          // and uses the fallback message.
+          console.warn("Could not parse error response JSON.");
+        }
+        throw new Error(errorMessage);
+      }
+
+      // 2. If the response IS OK (200)
+      // Now it's safe to parse the success JSON
       const data = await res.json();
 
-      if (res.ok && data.success) {
+      if (data.success) {
         localStorage.setItem("user", JSON.stringify({
-        id : data.user.id,
-        email: data.user.email,
-        role: data.user.role,
-        avatar: data.user.avatar || null,
-  }));
+          id: data.user.id,
+          email: data.user.email,
+          role: data.user.role,
+          avatar: data.user.avatar || null,
+        }));
         toast.success("Login successful! Redirecting...");
-        window.dispatchEvent(new Event("authChange"));
-
+        window.dispatchEvent(new Event("authChange")); // Good for updating other components
         setTimeout(() => router.push("/"), 1000);
       } else {
-        toast.error(data.message || "Invalid credentials");
+        // This handles cases where res.ok is true, but your API
+        // sends back { success: false, message: "..." }
+        throw new Error(data.message || "Login failed");
       }
-    } catch (err) {
+
+    } catch (err: any) { // 'err' will now be the Error we threw
       console.error("Login failed:", err);
-      toast.error("Something went wrong. Please try again.");
+      toast.error(err.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }

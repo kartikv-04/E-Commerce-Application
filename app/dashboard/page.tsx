@@ -35,13 +35,13 @@ export default function DashboardPage() {
       !form.productCategory ||
       !form.productImage
     ) {
-      toast.error("Please fill all fields 😅");
+      toast.error("Please fill all fields");
       return;
     }
 
     setLoading(true);
     try {
-      const res = await fetch("`${process.env.NEXT_PUBLIC_BASE_URL}/api/dashboard", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/dashboard`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -55,7 +55,7 @@ export default function DashboardPage() {
 
       if (!res.ok) throw new Error(data.message || "Failed to add product");
 
-      toast.success("🎉 Product added successfully!");
+      toast.success("Product added successfully!");
       setForm({
         productName: "",
         productDescription: "",
@@ -66,6 +66,7 @@ export default function DashboardPage() {
       });
     } catch (err: any) {
       toast.error(`Oops! ${err.message}`);
+      console.error(err.message);
     } finally {
       setLoading(false);
     }
@@ -73,7 +74,7 @@ export default function DashboardPage() {
 
   return (
     <div className="px-6 md:px-12 py-12 mt-6">
-      <h1 className="text-3xl font-bold mb-8">🛠️ Add New Product</h1>
+      <h1 className="text-3xl font-bold mb-8">Add New Product</h1>
 
       <Card className="max-w-3xl mx-auto shadow-md border">
         <CardHeader>
@@ -103,7 +104,7 @@ export default function DashboardPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label className="mb-3">Price ($)</Label>
+                <Label className="mb-3">Price (₹)</Label>
                 <Input
                   type="number"
                   name="productPrice"

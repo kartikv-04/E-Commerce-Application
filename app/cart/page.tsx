@@ -65,7 +65,7 @@ export default function CartPage() {
     localStorage.setItem("cart", JSON.stringify(updated));
   } else {
     try {
-      // ✅ Use relative URL
+      // Use relative URL
       const res = await fetch(`/api/cart?userId=${user.id}&productId=${id}`, {
         method: "DELETE",
       });

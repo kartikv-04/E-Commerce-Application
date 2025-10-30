@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Missing fields" }, { status: 400 });
     }
 
-    // ✅ Use modern ObjectId creation
+    // Use modern ObjectId creation
     const userObjectId = mongoose.Types.ObjectId.createFromHexString(userId);
     const productObjectId = mongoose.Types.ObjectId.createFromHexString(productId);
 
@@ -92,57 +92,57 @@ export async function GET(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  await connectDatabase();
+  await connectDatabase();
 
-  try {
-    // Get userId and productId from URL search parameters
-    // e.g., /api/cart?userId=...&productId=...
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
-    const productId = searchParams.get("productId");
+  try {
+    // Get userId and productId from URL search parameters
+    // e.g., /api/cart?userId=...&productId=...
+    const { searchParams } = new URL(req.url);
+    const userId = searchParams.get("userId");
+    const productId = searchParams.get("productId");
 
-    if (!userId || !productId) {
-      return NextResponse.json(
-        { success: false, message: "Missing userId or productId" },
-        { status: 400 }
-      );
-    }
+    if (!userId || !productId) {
+      return NextResponse.json(
+        { success: false, message: "Missing userId or productId" },
+        { status: 400 }
+      );
+    }
 
-    // Convert string IDs to Mongoose ObjectIds
-    const userObjectId = mongoose.Types.ObjectId.createFromHexString(userId);
-    const productObjectId = mongoose.Types.ObjectId.createFromHexString(productId);
+    // Convert string IDs to Mongoose ObjectIds
+    const userObjectId = mongoose.Types.ObjectId.createFromHexString(userId);
+    const productObjectId = mongoose.Types.ObjectId.createFromHexString(productId);
 
-    // Use findOneAndUpdate with $pull to atomically remove the item
-    // from the 'items' array.
-    const updatedCart = await CartModel.findOneAndUpdate(
-      { userId: userObjectId },
-      { $pull: { items: { productId: productObjectId } } },
-      { new: true } // Return the updated document after removal
-    );
+    // Use findOneAndUpdate with $pull to atomically remove the item
+    // from the 'items' array.
+    const updatedCart = await CartModel.findOneAndUpdate(
+      { userId: userObjectId },
+      { $pull: { items: { productId: productObjectId } } },
+      { new: true } // Return the updated document after removal
+    );
 
-    if (!updatedCart) {
-      // This means no cart was found for that userId
-      return NextResponse.json(
-        { success: false, message: "Cart not found" },
-        { status: 404 }
-      );
-    }
+    if (!updatedCart) {
+      // This means no cart was found for that userId
+      return NextResponse.json(
+        { success: false, message: "Cart not found" },
+        { status: 404 }
+      );
+    }
 
-    // Successfully removed
-    return NextResponse.json({
-      success: true,
-      message: "Item removed from cart",
-      cart: updatedCart,
-    });
-  } catch (err: any) {
-    console.error("Cart DELETE error:", err);
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Error removing from cart",
-        error: err.message,
-      },
-      { status: 500 }
-    );
-  }
+    // Successfully removed
+    return NextResponse.json({
+      success: true,
+      message: "Item removed from cart",
+      cart: updatedCart,
+    });
+  } catch (err: any) {
+    console.error("Cart DELETE error:", err);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Error removing from cart",
+        error: err.message,
+      },
+      { status: 500 }
+    );
+  }
 }

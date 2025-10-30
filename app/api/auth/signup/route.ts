@@ -35,10 +35,10 @@ export async function POST(req: Request) {
       );
     }
 
-    // 🔐 Hash the password safely
+    // Hash the password safely
     const hashedPassword = await hashPassword(password);
 
-    // 🧠 Create new user
+    // Create new user
     const user = new UserModel({
       email,
       password: hashedPassword,
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
 
     console.log(`New user created: ${user.email}`);
 
-    // 🎉 Send success response
+    // Send success response
     return NextResponse.json(
       {
         message: "User created successfully",

@@ -30,11 +30,13 @@ export default function LoginForm({
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-background">
-      <Card className="w-[400px] border border-black rounded-xl shadow-sm">
+    <div className="flex justify-center items-center min-h-screen bg-background px-4 py-8">
+      <Card className="w-full max-w-sm sm:max-w-md border border-black rounded-xl shadow-sm p-2">
         <CardHeader className="text-center space-y-1">
-          <CardTitle className="text-3xl font-bold text-zinc-900">Login</CardTitle>
-          <CardDescription>Enter your credentials to access your account</CardDescription>
+          <CardTitle className="text-2xl sm:text-3xl font-bold text-zinc-900">Login</CardTitle>
+          <CardDescription className="text-sm sm:text-base">
+            Enter your credentials to access your account
+          </CardDescription>
         </CardHeader>
 
         <CardContent>
@@ -65,7 +67,7 @@ export default function LoginForm({
           </form>
         </CardContent>
 
-        <CardFooter className="justify-center text-sm text-zinc-600">
+        <CardFooter className="justify-center text-sm text-zinc-600 text-center">
           Not registered?{" "}
           <a href="/auth/signup" className="ml-1 font-semibold text-black hover:underline">
             Sign up
@@ -98,9 +100,7 @@ function InputField({
           id={id}
           name={id}
           type={type}
-          placeholder={
-            type === "email" ? "you@example.com" : "••••••••"
-          }
+          placeholder={type === "email" ? "you@example.com" : "••••••••"}
           required
           className="pl-10 border border-black h-10 text-[15px]"
         />

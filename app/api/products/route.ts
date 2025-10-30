@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDatabase } from "@/lib/db";
 import { ProductModel } from "@/model/product.model";
-import logger from "@/lib/logger";
+
 
 export async function GET(req: NextRequest) {
   try {
@@ -12,8 +12,9 @@ export async function GET(req: NextRequest) {
 
     let filter = {};
     if (category) {
-      filter = { category }; // match products with the given category
+      filter = { productCategory: category };
     }
+
 
     const products = await ProductModel.find(filter);
 
@@ -22,7 +23,7 @@ export async function GET(req: NextRequest) {
       { status: 200 }
     );
   } catch (error: any) {
-    logger.error("Error fetching products:", error);
+    console.error("Error fetching products:", error);
     return NextResponse.json(
       { success: false, message: "Failed to fetch products" },
       { status: 500 }

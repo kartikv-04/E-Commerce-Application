@@ -1,39 +1,35 @@
-interface User{
-    _id? : string,
-    email : string, 
-    password : string,
-    role : UserRole,
-    refreshToken? : string | null,
-    createdAt? : boolean,
-    updatedAt? : boolean
+import mongoose, { Schema, Document, Model } from "mongoose";
+
+export interface IUser extends Document {
+  email: string;
+  password: string;
+  role: "User" | "Admin";
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-enum UserRole {
-    Admin = "admin",
-    User = "user"
-}
-
-import mongoose, { Schema } from "mongoose"
-
-const userSchema = new Schema<User>({
-    email : {
-        type : String,
-        required : true,
-        unique : true
-    },
-    password : {
-        type : String,
-        required : true,
-    },
-    role : {
-        type : String,
-        enum : Object.values(UserRole), 
-        required : true
-    },
-    refreshToken: {
+const userSchema = new Schema<IUser>(
+  {
+    email: {
       type: String,
-      default: null,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
     },
-}, { timestamps : true} )
+    password: {
+      type: String,
+      required: true,
+      minlength: 6,
+    },
+    role: {
+      type: String,
+      enum: ["User", "Admin"],
+      default: "User",
+    },
+  },
+  { timestamps: true }
+);
 
-export const UserModel = mongoose.model<User>("User", userSchema);
+export const UserModel: Model<IUser> =
+  mongoose.models.User || mongoose.model<IUser>("User", userSchema);

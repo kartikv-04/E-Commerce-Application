@@ -1,55 +1,83 @@
-import logger from "@/lib/logger";
-import { UserModel } from "@/model/user.model";
-import { connectDatabase } from "@/lib/db";
 import { NextResponse } from "next/server";
-import bcrypt from "bcrypt";
+import { connectDatabase } from "@/lib/db";
+import { UserModel } from "@/model/user.model";
 import { generateToken } from "@/lib/helper";
-
+import logger from "@/lib/logger";
+import bcrypt from "bcrypt";
 
 export async function POST(req: Request) {
+  try {
     await connectDatabase();
-    const body = await req.json();
-    const { email, password } = body;
+    const { email, password, role } = await req.json();
 
-    // check if email or password are empty
     if (!email || !password) {
-        logger.info("Signing up without email or password");
-        NextResponse.json({
-        message: "Email and Password are required",
-        status: 400,
-        });
+      return NextResponse.json(
+        { success: false, message: "Email and password are required" },
+        { status: 400 }
+      );
     }
 
-    // check if user exist
-    const findUSer = await UserModel.findOne({email});
-    if(!findUSer){
-        logger.warn("login attempt with unregistered email");
-        return NextResponse.json({
-            message : "Invalid email or password",
-            status : 401
-        })
-    }
-    
-    // Compare passwpord to check
-    const checkPassword = await bcrypt.compare(password, findUSer.password);
-    if(!checkPassword){
-        logger.warn("Login try using incorrect password");
-        return NextResponse.json({
-            message : "Invalid email or password",
-            status : 401
-        })
+    const user = await UserModel.findOne({ email, role });
+    if (!user) {
+      return NextResponse.json(
+        { success: false, message: "Invalid credentials" },
+        { status: 401 }
+      );
     }
 
-    // Generate accessToken using jwt
-    const accessToken = generateToken({userid : findUSer._id, email : findUSer.email});
-    logger.info("User logged in successfully");
-    return NextResponse.json({
-        message : "User logged in Successfully",
-        status : 200,
-        token : accessToken
-    })
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return NextResponse.json(
+        { success: false, message: "Invalid credentials" },
+        { status: 401 }
+      );
+    }
 
+    // --- THIS IS THE FIX ---
+    // Create a plain object for the JWT payload.
+    // Do NOT pass the entire Mongoose `user` document.
+    const tokenPayload = {
+      id: user._id,
+      email: user.email,
+      role: user.role,
+    };
 
+    // Pass the new, plain object to your helper
+    const token = await generateToken(tokenPayload);
+    // ------------------------
 
+    if (!token) {
+      console.error("Token generation failed for user:", user.email);
+      return NextResponse.json(
+        { success: false, message: "Internal server error (token)" },
+        { status: 500 }
+      );
+    }
 
+    const res = NextResponse.json({
+      success: true,
+      message: "Login successful",
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+      },
+    });
+
+    res.cookies.set("accessToken", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+    });
+
+    return res;
+  } catch (error: any) {
+    logger.error("Login error:", error);
+    return NextResponse.json(
+      { success: false, message: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }

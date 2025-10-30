@@ -4,12 +4,21 @@ import { useState } from "react";
 import { Mail, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
 } from "@/components/ui/select";
 
 export default function LoginForm({
@@ -30,11 +39,11 @@ export default function LoginForm({
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-background px-4 py-8">
-      <Card className="w-full max-w-sm sm:max-w-md border border-black rounded-xl shadow-sm p-2">
+    <div className="flex justify-center items-center min-h-screen bg-background px-3 sm:px-0">
+      <Card className="w-full sm:w-[400px] border border-black rounded-xl shadow-sm">
         <CardHeader className="text-center space-y-1">
-          <CardTitle className="text-2xl sm:text-3xl font-bold text-zinc-900">Login</CardTitle>
-          <CardDescription className="text-sm sm:text-base">
+          <CardTitle className="text-3xl font-bold text-zinc-900">Login</CardTitle>
+          <CardDescription>
             Enter your credentials to access your account
           </CardDescription>
         </CardHeader>
@@ -69,7 +78,10 @@ export default function LoginForm({
 
         <CardFooter className="justify-center text-sm text-zinc-600 text-center">
           Not registered?{" "}
-          <a href="/auth/signup" className="ml-1 font-semibold text-black hover:underline">
+          <a
+            href="/auth/signup"
+            className="ml-1 font-semibold text-black hover:underline"
+          >
             Sign up
           </a>
         </CardFooter>
@@ -95,14 +107,16 @@ function InputField({
         {label}
       </Label>
       <div className="relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600">{icon}</span>
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600">
+          {icon}
+        </span>
         <Input
           id={id}
           name={id}
           type={type}
           placeholder={type === "email" ? "you@example.com" : "••••••••"}
           required
-          className="pl-10 border border-black h-10 text-[15px]"
+          className="pl-10 border border-black h-10 text-[15px] w-full"
         />
       </div>
     </div>

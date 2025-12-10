@@ -1,6 +1,22 @@
-import type { NextConfig } from "next";
+/** @type {import("next").NextConfig} */
+const nextConfig = {
+  // Turn OFF Turbopack completely
+  experimental: {
+    // this disables the turbopack worker
+    webpackBuildWorker: false,
+  },
 
-const nextConfig: NextConfig = {
+  // Force Next.js to use Webpack instead of Turbopack
+  webpack: (config: any) => {
+    // ignore test files inside thread-stream or other backend deps
+    config.module.rules.push({
+      test: /\.test\.js$/,
+      use: 'null-loader',
+    });
+
+    return config;
+  },
+
   images: {
     remotePatterns: [
       {
@@ -9,10 +25,8 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  reactCompiler : true,
-  experimental : { 
-     turbopackFileSystemCacheForDev : true,
-  }
+
+  reactCompiler: true,
 };
 
-export default nextConfig;
+module.exports = nextConfig;

@@ -8,13 +8,13 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    console.log("🧩 CART REQ BODY:", body);
+    console.log("CART REQ BODY:", body);
 
     const { userId, productId, quantity } = body;
 
 
     if (!userId || !productId) {
-      console.log("🚨 Missing fields:", { userId, productId, quantity });
+      console.log("Missing fields:", { userId, productId, quantity });
 
       return NextResponse.json({ message: "Missing fields" }, { status: 400 });
     }
